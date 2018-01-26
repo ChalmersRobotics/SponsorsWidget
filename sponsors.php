@@ -74,16 +74,52 @@ function wpt_add_sponsor_metaboxes( $post ) {
 }
 function wpt_sponsor() {
 	global $post;
+	wp_enqueue_script('jquery');
+	wp_enqueue_script('thickbox');
+	wp_enqueue_style('thickbox');
+	wp_enqueue_script('media-upload');
+	wp_enqueue_script('wptuts-upload');
+
 	//Nonce field to validate form request came from current site
 	wp_nonce_field( basename( __FILE__ ), 'sponsor_fields' );
+
 	//Parameter sponsor url
 	$sponsorurl = get_post_meta( $post->ID, 'sponsorurl', true );
 	echo '<label>' . esc_attr_e( 'URL to sponsor:', 'text_domain' ) . '</label>';
-	echo '<input type="text" name="sponsorurl" value="' . esc_textarea( $sponsorurl )  . '" class="widefat">';
+	echo '<input type="text" name="sponsorurl" id="sponsorurl" value="' . esc_url( $sponsorurl )  . '" class="widefat" />';
+
 	//Parameter for movement url
 	$sponsorimage = get_post_meta( $post->ID, 'sponsorimage', true );
 	echo '<label>' . esc_attr_e( 'URL to sponsor image:', 'text_domain' ) . '</label>';
-	echo '<input type="text" name="sponsorimage" value="' . esc_textarea( $sponsorimage )  . '" class="widefat">';
+	echo '<input type="text" name="sponsorimage" id="sponsorimage" value="' . esc_url( $sponsorimage )  . '" class="widefat" />';
+	echo '<input id="upload_logo_button" type="button" class="button" value="Upload Logo" />';
+	echo '<span class="description">Upload an image for the logotype</span>';
+	echo '<div id="logopreview"></div>';
+	MediaUploadScript();
+}
+function MediaUploadScript() {
+	?>
+	<script type="text/javascript" language="javascript">// <![CDATA[
+		jQuery(document).ready(function($) {
+			$('#upload_logo_button').click(function() {
+				//Thickbox open Media Uploader
+				tb_show('Upload a logo', 'media-upload.php?type=image&TB_iframe=true&post_id=0', false);
+				return false;
+			});
+			window.send_to_editor = function(html) {
+				imgurl = jQuery('img', html).attr('src');
+				jQuery('#sponsorimage').val(imgurl);
+				jQuery('#logopreview').html(html);
+				jQuery('#logopreview img').css("max-width", "100%");
+				tb_remove();
+			};
+			if (jQuery('#sponsorimage').val()) {
+				jQuery('#logopreview').prepend('<img class="alignnone" src="' + jQuery('#sponsorimage').val() + '" style="max-width: 100%" />');
+			}
+		});
+		// ]]>
+	</script>
+	<?php
 }
 function save_meta_box_sponsor( $post_id, $post ) {
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
