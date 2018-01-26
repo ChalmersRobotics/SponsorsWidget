@@ -34,8 +34,21 @@ class Sponsors_Widget extends WP_Widget {
 		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
 		}
-		/*
-		*/
+		//Get sponsors's
+		$sponsors = get_posts(array('post_type' => 'sponsor',
+										'posts_per_page'=>-1,
+										'orderby' => 'rand',
+										'order'    => 'ASC'
+									));
+		//var_dump($sponsors);
+		foreach($sponsors as $sponsor) {
+			$sponsorurl = get_post_meta( $sponsor->ID, 'sponsorurl', true );
+			$sponsorimage = get_post_meta( $sponsor->ID, 'sponsorimage', true );
+			//var_dump($sponsorimage);
+			?>
+				<p><a href="<?php echo $sponsorurl; ?>" title="<?php echo $sponsor->post_title; ?>" target="_blank"><img src="<?php echo $sponsorimage; ?>" title="<?php echo $sponsor->post_title; ?>" alt="<?php echo $sponsor->post_title; ?>" /></a></p><br />
+			<?php
+		}
 		echo $args['after_widget'];
 	}
 
